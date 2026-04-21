@@ -1,5 +1,7 @@
 # 🛒 Brazilian E-Commerce Sales Dashboard — Olist
 
+![Olist Dashboard Infographic](dashboard_olist.png)
+
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.32-FF4B4B?logo=streamlit&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-2.2-150458?logo=pandas&logoColor=white)
