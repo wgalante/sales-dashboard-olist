@@ -1,6 +1,6 @@
 # 🛒 Brazilian E-Commerce Sales Dashboard — Olist
 
-![Olist Dashboard Infographic](dashboard_olist.png)
+![Olist Sales Dashboard](dashboard_screenshot.png)
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.32-FF4B4B?logo=streamlit&logoColor=white)
@@ -14,6 +14,8 @@
 ## 🔗 Live Demo
 
 🔗 **Live Demo:** [View Dashboard](https://olist-sales-dashboard.streamlit.app/)
+
+> The app is hosted on Streamlit Community Cloud and sleeps when idle. If you see a "wake up" screen, click the button and give it ~30 seconds.
 
 ---
 
@@ -40,11 +42,15 @@ All four visuals respond to the sidebar **date-range filter** — select any win
 
 Over the full two-year dataset (Oct 2016 – Sep 2018), the Olist platform processed **98,666 orders** generating **R$ 15,843,554** in total revenue, with an average ticket of **R$ 160.58** per order.
 
-**Health & beauty leads** the category ranking at ~R$ 1.4M in revenue — nearly double the next-closest category — reflecting strong consumer demand in personal care.
+**Revenue grew about 8× in one year**, from R$ 137K in January 2017 to over R$ 1.1M per month by early 2018, then plateaued around R$ 1.0–1.15M through August 2018.
 
-**Logistics performance is a standout**: 97.8% of orders reached a delivered status, confirming that the last-mile supply chain operated reliably at scale throughout the period.
+**November 2017 is the single highest month (R$ 1.18M)**, driven by Black Friday — a clear signal for campaign and stock planning.
 
-Revenue growth was not linear — the monthly chart reveals clear seasonality spikes, particularly around mid-year and year-end promotional events, offering a targeting signal for future campaign planning.
+**Revenue is spread across categories, not concentrated.** Health & Beauty leads with R$ 1.44M, but Watches & Gifts (R$ 1.31M) and Bed, Bath & Table (R$ 1.24M) are close behind. No single category dominates, which lowers dependency risk.
+
+**97.8% of orders reached "delivered" status.** Note that delivered is not the same as *on time*: my companion project [olist-delivery-quality-analysis](https://github.com/wgalante/olist-delivery-quality-analysis) shows that late deliveries cut customer review scores by up to 49%.
+
+> **Data note:** the dataset begins and ends with partial months (e.g. September 2018 has only a few orders). Months with fewer than 500 orders are excluded from the trend line so they don't appear as a false revenue collapse. KPIs still use the full date range selected.
 
 ---
 
@@ -63,19 +69,13 @@ Revenue growth was not linear — the monthly chart reveals clear seasonality sp
 
 ```bash
 # 1. Clone the repo
-git clone <repo-url>
-cd sales-dashboard
+git clone https://github.com/wgalante/sales-dashboard-olist.git
+cd sales-dashboard-olist
 
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Add the dataset
-# Download the three CSVs from Kaggle and place them in data/:
-#   olist_orders_dataset.csv
-#   olist_order_items_dataset.csv
-#   olist_products_dataset.csv
-
-# 4. Launch the dashboard
+# 3. Launch the dashboard (the three CSVs are already in data/)
 streamlit run app.py
 ```
 
@@ -86,7 +86,7 @@ The app opens at `http://localhost:8501` in your browser.
 ## 📁 Project Structure
 
 ```
-sales-dashboard/
+sales-dashboard-olist/
 ├── app.py                          # Streamlit UI — layout only, zero business logic
 ├── utils.py                        # Data loading, merging, and KPI calculations
 ├── requirements.txt                # Pinned dependencies

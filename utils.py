@@ -19,6 +19,9 @@ _ORDERS_FILE = DATA_DIR / "olist_orders_dataset.csv"
 _ITEMS_FILE = DATA_DIR / "olist_order_items_dataset.csv"
 _PRODUCTS_FILE = DATA_DIR / "olist_products_dataset.csv"
 
+# Months with fewer orders than this are treated as incomplete in the trend chart.
+MIN_ORDERS_PER_MONTH = 500
+
 
 @st.cache_data
 def load_data() -> pd.DataFrame:
@@ -72,6 +75,36 @@ def load_data() -> pd.DataFrame:
 
     return df
 
+# English display names for the most common Olist categories (the raw dataset
+# uses Portuguese snake_case). Unmapped categories fall back to a cleaned label.
+CATEGORY_LABELS_EN = {
+    "beleza_saude": "Health & Beauty",
+    "relogios_presentes": "Watches & Gifts",
+    "cama_mesa_banho": "Bed, Bath & Table",
+    "esporte_lazer": "Sports & Leisure",
+    "informatica_acessorios": "Computer Accessories",
+    "moveis_decoracao": "Furniture & Decor",
+    "utilidades_domesticas": "Housewares",
+    "cool_stuff": "Cool Stuff",
+    "automotivo": "Automotive",
+    "ferramentas_jardim": "Garden Tools",
+    "brinquedos": "Toys",
+    "bebes": "Baby",
+    "perfumaria": "Perfumery",
+    "telefonia": "Telephony",
+    "moveis_escritorio": "Office Furniture",
+    "papelaria": "Stationery",
+    "pet_shop": "Pet Shop",
+    "eletronicos": "Electronics",
+    "construcao_ferramentas_construcao": "Construction Tools",
+    "fashion_bolsas_e_acessorios": "Bags & Accessories",
+}
+
+
+def category_label(raw: str) -> str:
+    """Readable English label for an Olist category name."""
+    return CATEGORY_LABELS_EN.get(raw, raw.replace("_", " ").capitalize())
+
 
 def get_monthly_revenue(df: pd.DataFrame) -> pd.DataFrame:
     """Aggregate total revenue by calendar month.
@@ -81,16 +114,23 @@ def get_monthly_revenue(df: pd.DataFrame) -> pd.DataFrame:
     df : pd.DataFrame
         Consolidated DataFrame produced by load_data().
 
+    Months with fewer than MIN_ORDERS_PER_MONTH orders (the partial months at
+    the edges of the dataset) are excluded.
+
     Returns
     -------
     pd.DataFrame
         Columns: order_month (Timestamp), revenue (float), sorted ascending.
     """
-    return (
-        df.groupby("order_month", as_index=False)["revenue"]
-        .sum()
+    monthly = (
+        df.groupby("order_month", as_index=False)
+        .agg(revenue=("revenue", "sum"), orders=("order_id", "nunique"))
         .sort_values("order_month")
     )
+    # The dataset starts and ends with partial months (e.g. Sep 2018 has only a
+    # handful of orders). Plotting them would show a fake collapse in revenue,
+    # so months below a minimum order volume are left out of the trend line.
+    return monthly[monthly["orders"] >= MIN_ORDERS_PER_MONTH][["order_month", "revenue"]]
 
 
 def get_top_categories(df: pd.DataFrame, n: int = 10) -> pd.DataFrame:
@@ -109,7 +149,7 @@ def get_top_categories(df: pd.DataFrame, n: int = 10) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        Columns: product_category_name (str), revenue (float),
+        Columns: product_category_name (str, English display label), revenue (float),
         sorted descending by revenue, length ≤ n.
     """
     return (
@@ -118,6 +158,7 @@ def get_top_categories(df: pd.DataFrame, n: int = 10) -> pd.DataFrame:
         .sum()
         .sort_values("revenue", ascending=False)
         .head(n)
+        .assign(product_category_name=lambda d: d["product_category_name"].map(category_label))
     )
 
 
